@@ -1,0 +1,356 @@
+/* ============================================================
+ * Interactive playground — panel styles
+ * ============================================================
+ *
+ * Styles `<div class="try-it">` panels hydrated by playground.js.
+ * Tracks the custom.css token palette so the panels pick up the
+ * same accent + radius + font stack as the rest of the book.
+ */
+
+.hp-panel {
+  border: 1px solid var(--table-border-color);
+  border-radius: var(--hs-radius);
+  margin: 1.8em 0;
+  background:
+    linear-gradient(180deg,
+      rgba(157, 122, 255, 0.05) 0%,
+      rgba(157, 122, 255, 0.01) 100%);
+  overflow: hidden;
+  box-shadow: var(--hs-shadow);
+}
+
+.hp-panel > summary {
+  padding: 0.75em 1em;
+  font-size: 0.95em;
+  cursor: pointer;
+  background: rgba(157, 122, 255, 0.06);
+  list-style: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  transition: background 120ms ease;
+}
+.hp-panel > summary:hover {
+  background: rgba(157, 122, 255, 0.12);
+}
+.hp-panel > summary::-webkit-details-marker { display: none; }
+.hp-panel > summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  margin-right: 0.1em;
+  opacity: 0.55;
+  transition: transform 160ms ease;
+}
+.hp-panel[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+/* Method pills in the summary row. */
+.hp-method {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.2em;
+  padding: 0.2em 0.55em;
+  border-radius: var(--hs-radius-sm);
+  font-family: var(--hs-mono);
+  font-size: 0.76em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+.hp-method.hp-get    { background: #10b981; }
+.hp-method.hp-post   { background: #3b82f6; }
+.hp-method.hp-put    { background: #f59e0b; }
+.hp-method.hp-delete { background: #ef4444; }
+
+.hp-panel > summary > code {
+  font-family: var(--hs-mono);
+  background: none;
+  padding: 0;
+  border: 0;
+  color: var(--fg);
+  font-size: 0.92em;
+  white-space: normal;
+}
+
+.hp-title {
+  color: var(--fg);
+  opacity: 0.6;
+  font-weight: 400;
+  font-size: 0.9em;
+}
+
+/* --------------------------- host bar ----------------------- */
+
+.hp-bar {
+  display: flex;
+  gap: 0.7em;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 0.85em 1em;
+  border-top: 1px solid var(--table-border-color);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 0.88em;
+}
+.light .hp-bar {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.hp-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.hp-bar input[type="text"] {
+  width: 280px;
+  padding: 0.5em 0.7em;
+  font-family: var(--hs-mono);
+  font-size: 0.88em;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--table-border-color);
+  border-radius: var(--hs-radius-sm);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.hp-bar input[type="text"]:focus {
+  outline: none;
+  border-color: var(--hs-accent);
+  box-shadow: 0 0 0 3px var(--hs-accent-glow);
+}
+.hp-bar .hp-fid { width: 120px; }
+
+.hp-bar button {
+  padding: 0.55em 1em;
+  border-radius: var(--hs-radius-sm);
+  border: 1px solid rgba(157, 122, 255, 0.4);
+  background:
+    linear-gradient(180deg,
+      rgba(157, 122, 255, 0.18) 0%,
+      rgba(157, 122, 255, 0.08) 100%);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--hs-sans);
+  font-weight: 600;
+  font-size: 0.85em;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+.hp-bar button:hover {
+  background:
+    linear-gradient(180deg,
+      rgba(157, 122, 255, 0.28) 0%,
+      rgba(157, 122, 255, 0.15) 100%);
+  border-color: var(--hs-accent);
+}
+.hp-bar button:active { transform: translateY(1px); }
+
+.hp-wallet-addr {
+  font-family: var(--hs-mono);
+  font-size: 0.8em;
+  color: var(--fg);
+  opacity: 0.55;
+  padding: 0.2em 0;
+}
+.hp-wallet-addr.hp-connected {
+  color: var(--hs-success);
+  opacity: 1;
+}
+.hp-wallet-addr.hp-connected::before {
+  content: "●";
+  margin-right: 0.35em;
+}
+
+/* --------------------------- auth note ---------------------- */
+
+.hp-auth-note {
+  padding: 0.7em 1em;
+  font-size: 0.82em;
+  background: rgba(157, 122, 255, 0.04);
+  border-top: 1px solid var(--table-border-color);
+  opacity: 0.75;
+}
+.hp-auth-note code {
+  font-family: var(--hs-mono);
+  font-size: 0.95em;
+  padding: 0 0.25em;
+  border-radius: 3px;
+  background: rgba(157, 122, 255, 0.12);
+}
+
+/* --------------------------- form --------------------------- */
+
+.hp-form {
+  display: grid;
+  gap: 0.9em;
+  padding: 1em;
+  border-top: 1px solid var(--table-border-color);
+}
+
+.hp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  font-size: 0.85em;
+}
+.hp-field > span {
+  font-weight: 600;
+  font-size: 0.74em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.hp-field input {
+  padding: 0.55em 0.75em;
+  font-family: var(--hs-mono);
+  font-size: 0.88em;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--table-border-color);
+  border-radius: var(--hs-radius-sm);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.hp-field input:focus {
+  outline: none;
+  border-color: var(--hs-accent);
+  box-shadow: 0 0 0 3px var(--hs-accent-glow);
+}
+
+.hp-body-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  font-size: 0.85em;
+}
+.hp-body-box > span {
+  font-weight: 600;
+  font-size: 0.74em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.hp-body-box textarea {
+  font-family: var(--hs-mono);
+  font-size: 0.85em;
+  padding: 0.7em 0.8em;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--table-border-color);
+  border-radius: var(--hs-radius-sm);
+  line-height: 1.55;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.hp-body-box textarea:focus {
+  outline: none;
+  border-color: var(--hs-accent);
+  box-shadow: 0 0 0 3px var(--hs-accent-glow);
+}
+
+/* --------------------------- run button --------------------- */
+
+.hp-run {
+  justify-self: start;
+  padding: 0.65em 1.4em;
+  border-radius: var(--hs-radius-sm);
+  border: 0;
+  background:
+    linear-gradient(135deg,
+      var(--hs-accent) 0%,
+      var(--hs-accent-2) 100%);
+  color: #ffffff;
+  font-family: var(--hs-sans);
+  font-weight: 700;
+  font-size: 0.88em;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(124, 92, 255, 0.35);
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+.hp-run:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 4px 16px rgba(124, 92, 255, 0.45);
+  transform: translateY(-1px);
+}
+.hp-run:active {
+  transform: translateY(0);
+}
+.hp-run:disabled {
+  filter: grayscale(0.3) brightness(0.7);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --------------------------- output ------------------------- */
+
+.hp-output {
+  padding: 1em;
+  border-top: 1px solid var(--table-border-color);
+  background: rgba(0, 0, 0, 0.12);
+}
+.light .hp-output {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.hp-meta {
+  font-family: var(--hs-mono);
+  font-size: 0.82em;
+  margin-bottom: 0.6em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  color: var(--fg);
+}
+.hp-meta code {
+  background: rgba(157, 122, 255, 0.12);
+  border: 1px solid rgba(157, 122, 255, 0.18);
+  padding: 0.1em 0.45em;
+  border-radius: var(--hs-radius-sm);
+  font-size: 0.92em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 56ch;
+}
+.hp-meta strong {
+  font-weight: 700;
+  padding: 0.1em 0.55em;
+  border-radius: var(--hs-radius-sm);
+  font-size: 0.92em;
+}
+.hp-meta .hp-ms {
+  opacity: 0.55;
+  font-size: 0.88em;
+  margin-left: auto;
+}
+
+.hp-body-out {
+  margin: 0;
+  padding: 0.85em 1em;
+  background: var(--bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: var(--hs-radius-sm);
+  max-height: 440px;
+  overflow: auto;
+  font-family: var(--hs-mono);
+  font-size: 0.82em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--fg);
+}

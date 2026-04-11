@@ -1,0 +1,41 @@
+[book]
+title = "Hypersnap API"
+authors = ["Hypersnap contributors"]
+description = "Developer reference for the Hypersnap Farcaster API — build clients, agents, and mini apps against a hypersnap node."
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/farcasterorg/hypersnap"
+edit-url-template = "https://github.com/farcasterorg/hypersnap/edit/main/../hypersnap-docs-web/{path}"
+additional-css = ["theme/custom.css", "theme/playground.css"]
+additional-js  = ["theme/playground.js"]
+no-section-label = false
+
+[output.html.print]
+enable = true
+
+[output.html.fold]
+enable = true
+level = 1
+
+# Built-in compile-time search. mdBook ships an `elasticlunr`-based
+# indexer that runs during `mdbook build` and produces a fully
+# client-side search — no external services, no runtime deps.
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+copy-js = true
