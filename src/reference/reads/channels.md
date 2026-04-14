@@ -34,7 +34,7 @@ Look up a single channel.
 
 ## GET /v2/farcaster/channel/all
 
-List every channel the node knows about.
+List every channel the node knows about. Also reachable as `GET /v2/farcaster/channel/list` (spec-compat alias).
 
 **Query parameters**
 
@@ -112,7 +112,7 @@ Channels with the most engagement over a rolling window.
 
 ## GET /v2/farcaster/channel/members
 
-Members of a specific channel. Also reachable as `/v2/farcaster/channel/member/list`.
+Members of a specific channel. Also reachable as `/v2/farcaster/channel/member/list`, `/v2/farcaster/channel/followers`, and `/v2/farcaster/channel/followers/relevant` — all three forward to the same member-list handler.
 
 **Query parameters**
 
@@ -137,9 +137,21 @@ Members of a specific channel. Also reachable as `/v2/farcaster/channel/member/l
 
 ---
 
+## GET /v2/farcaster/channel/member/invite/list
+
+List open channel-member invites. The Farcaster protocol does not include an on-chain invite system — this endpoint is registered for SDK compatibility and returns an empty list.
+
+**Response**
+
+```json
+{ "members": [], "next": { "cursor": null } }
+```
+
+---
+
 ## GET /v2/farcaster/channel/user-active
 
-Channels where a specific user has recently been active.
+Channels where a specific user has recently been active. Also reachable as `GET /v2/farcaster/channel/user` (spec-compat alias).
 
 **Query parameters**
 
@@ -155,3 +167,7 @@ Channels where a specific user has recently been active.
      data-title="Try /v2/farcaster/channel/user-active"
      data-auth="none"
      data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>
+
+## Write endpoints
+
+`POST /v2/farcaster/channel/follow`, `DELETE /v2/farcaster/channel/follow`, `POST /v2/farcaster/channel/member/invite`, `PUT /v2/farcaster/channel/member/invite`, and `DELETE /v2/farcaster/channel/member` are registered but return `501 Not Implemented`. Follow/unfollow is expressed through the protocol via signed `LinkAdd`/`LinkRemove` messages.

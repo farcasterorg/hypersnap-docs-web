@@ -87,7 +87,7 @@ Addresses that aren't verified against any FID are silently omitted.
 
 ## GET /v2/farcaster/user/by-username
 
-Look up a user by username. Accepts fnames, ENS names, and Basenames — whatever resolves through the username-proof table.
+Look up a user by username. Accepts fnames, ENS names, and Basenames — whatever resolves through the username-proof table. Also reachable as `GET /v2/farcaster/user/by_username` (underscore variant).
 
 **Query parameters**
 
@@ -103,6 +103,70 @@ Look up a user by username. Accepts fnames, ENS names, and Basenames — whateve
      data-title="Try /v2/farcaster/user/by-username"
      data-auth="none"
      data-fields="username|query|string|e.g. dwr.eth|dwr.eth|required"></div>
+
+---
+
+## GET /v2/farcaster/user/custody-address
+
+Reverse-lookup: find the user whose custody Ethereum address matches.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `custody_address` | string | yes | `0x`-prefixed Ethereum address. |
+
+**Response** — `UserResponse`. `404` if no FID is registered to that address. If multiple FIDs share the address (legacy), the first is returned.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/custody-address"
+     data-title="Try /v2/farcaster/user/custody-address"
+     data-auth="none"
+     data-fields="custody_address|query|string|0x-prefixed address||required"></div>
+
+---
+
+## GET /v2/farcaster/user/by_x_username
+
+Look up an FID by the user's self-declared X/Twitter username. Backed by a reverse index built from `UserDataAdd` messages of type `USER_DATA_TYPE_TWITTER`.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `username` | string | yes | Case-insensitive match against the stored X username. |
+
+**Response** — `UserResponse`. `404` if no user has that X username registered.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/by_x_username"
+     data-title="Try /v2/farcaster/user/by_x_username"
+     data-auth="none"
+     data-fields="username|query|string|X/Twitter username||required"></div>
+
+---
+
+## GET /v2/farcaster/user/by_location
+
+Find users whose declared location matches a prefix. Backed by a reverse index built from `UserDataAdd` messages of type `USER_DATA_TYPE_LOCATION`.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `location` | string | yes | Prefix-match against the stored location string (case-insensitive). |
+| `limit` | usize | no | Default `10`. |
+
+**Response** — `BulkUsersResponse`.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/by_location"
+     data-title="Try /v2/farcaster/user/by_location"
+     data-auth="none"
+     data-fields="location|query|string|e.g. brooklyn||required;limit|query|usize||10"></div>
 
 ---
 
@@ -213,3 +277,144 @@ How much of the allocated storage the FID has actually consumed, broken down by 
      data-title="Try /v2/farcaster/user/storage-usage"
      data-auth="none"
      data-fields="fid|query|u64||3|required"></div>
+
+Also reachable as `GET /v2/farcaster/storage/usage` and `GET /v2/farcaster/storage/allocations` — identical behavior, different paths.
+
+---
+
+## GET /v2/farcaster/user/fid
+
+List registered FIDs on the network, paginated.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `limit` | usize | no | Default `10`. |
+| `cursor` | string | no | Hex-encoded pagination cursor. |
+
+**Response**
+
+```json
+{ "fids": [1, 2, 3], "next": { "cursor": "..." } }
+```
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/fid"
+     data-title="Try /v2/farcaster/user/fid"
+     data-auth="none"
+     data-fields="limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/user/channels
+
+Channels a user has recently been active in. Alias of `GET /v2/farcaster/channel/user-active`.
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `fid` | u64 | yes |
+| `limit` | usize | no |
+| `cursor` | string | no |
+
+**Response** — `ChannelsResponse`.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/channels"
+     data-title="Try /v2/farcaster/user/channels"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/user/memberships/list
+
+Alias of `GET /v2/farcaster/user/channels` — returns the same active-channels list in a membership-oriented response shape.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/memberships/list"
+     data-title="Try /v2/farcaster/user/memberships/list"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/user/best_friends
+
+Users that both follow and are followed by `fid` — the intersection. Sorted by most recent mutual follow.
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `fid` | u64 | yes |
+| `limit` | usize | no |
+| `cursor` | string | no |
+
+**Response** — `FollowersResponse`.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/best_friends"
+     data-title="Try /v2/farcaster/user/best_friends"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/user/interactions
+
+Summarize the interaction history between two FIDs: mention counts, reaction counts, mutual-follow state.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `fid` | u64 | yes | The "from" user. |
+| `target_fid` | u64 | no | The "to" user. If omitted, an empty summary is returned. |
+
+**Response**
+
+```json
+{
+  "interactions": {
+    "fid": 3,
+    "target_fid": 5,
+    "mentions": 7,
+    "reactions": 42,
+    "mutual_follow": true
+  }
+}
+```
+
+Mentions are computed from the `CastsByMention` index (casts by `fid` that mention `target_fid`). Reactions are computed from the reactor's reaction set. Mutual-follow is a single index lookup.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/user/interactions"
+     data-title="Try /v2/farcaster/user/interactions"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;target_fid|query|u64||5"></div>
+
+---
+
+## Endpoints with no protocol data
+
+The following endpoints are registered for SDK compatibility but return empty responses because the Farcaster protocol does not track the underlying data:
+
+| Path | Returns | Why |
+|---|---|---|
+| `GET /v2/farcaster/user/power_users` | `{ "users": [] }` | Power-user curation is a proprietary scoring signal, not protocol data. |
+| `GET /v2/farcaster/user/balance` | `{ "balances": [], "next": { "cursor": null } }` | Token balances are on-chain state outside the Farcaster protocol. |
+| `GET /v2/farcaster/user/subscribed_to` | `{ "subscriptions": [], "next": { "cursor": null } }` | User-to-user subscriptions are not in the protocol. |
+| `GET /v2/farcaster/user/subscribers` | `{ "subscriptions": [], "next": { "cursor": null } }` | Same as above. |
+| `GET /v2/farcaster/user/subscriptions_created` | `{ "subscriptions": [], "next": { "cursor": null } }` | Same as above. |
+
+## Write endpoints
+
+Endpoints that mutate user state (`POST /v2/farcaster/user/register`, `POST /v2/farcaster/user/follow`, `DELETE /v2/farcaster/user/follow`, `POST /v2/farcaster/user/verification`, `DELETE /v2/farcaster/user/verification`, `PATCH /v2/farcaster/user`) are registered but return `501 Not Implemented`. Write operations require submitting a signed Farcaster protocol message via the gRPC `SubmitMessage` endpoint instead.

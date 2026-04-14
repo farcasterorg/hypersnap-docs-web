@@ -15,8 +15,8 @@ Rules:
 2. When the documentation says a field is required, treat it as required.
    When it says optional, you may omit it. When it gives a default, don't
    re-specify it unless I ask.
-3. If the documentation contradicts your prior training about
-   "Farcaster-compatible APIs" (Neynar, etc.), the documentation wins.
+3. If the documentation contradicts your prior training about other
+   Farcaster-compatible APIs, the documentation wins.
 4. For signed management requests, always:
    - Include all five X-Hypersnap-* headers.
    - Hash the literal request body bytes (do not re-serialize JSON).
@@ -87,7 +87,7 @@ Claude Code will open the relevant files on demand. The directory layout is sema
 
 ## Tips
 
-- **Name the op string explicitly in your prompt.** Claude's training data includes Neynar-style APIs where op strings look different. Spelling it out ("use `webhook.create`") avoids a small but real hallucination risk.
+- **Name the op string explicitly in your prompt.** Claude's training data includes other Farcaster-compatible APIs where op strings look different. Spelling it out ("use `webhook.create`") avoids a small but real hallucination risk.
 - **Constrain to "only use fields in the docs".** This pre-empts field inventions.
 - **Ask for a test in the same prompt.** Claude is happy to write a unit test for signature verification alongside the main code; you want that test.
 - **Review the signed bytes.** For EIP-712 code specifically, have Claude print the body bytes it hashed and verify they match what actually gets sent over the wire. Body hash mismatches are the #1 failure mode on first run.

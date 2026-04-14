@@ -19,15 +19,16 @@ The manifest targets the playground page as the home — that's the part develop
 
 ## Detection inside the playground
 
-When loaded as a mini app, the playground JS looks for a Farcaster mini-app SDK global on the window:
+The playground's Connect-wallet flow walks four detection paths in order and uses the first one that yields an EIP-1193 provider:
 
-```js
-if (window.sdk && window.sdk.wallet && window.sdk.wallet.ethProvider) {
-  // use sdk.wallet.ethProvider for eth_signTypedData_v4
-}
-```
+1. **Farcaster mini-app SDK, async API** — `window.sdk.wallet.getEthereumProvider()` if the global exposes the new async getter.
+2. **Farcaster mini-app SDK, legacy sync property** — `window.sdk.wallet.ethProvider` or `window.farcasterMiniApp.ethProvider` for older clients.
+3. **EIP-6963 multi-wallet discovery** — listens for `eip6963:announceProvider` events and picks the first announced provider. This is how modern extensions (MetaMask, Rabby, Coinbase Wallet) expose themselves without stomping on `window.ethereum`.
+4. **Generic injected EIP-1193** — `window.ethereum` (or the first entry of `window.ethereum.providers` when multiple wallets have injected).
 
-It falls back to `window.ethereum` (MetaMask / Frame / Rabby / etc.) if the mini-app SDK isn't present. Either way, the rest of the flow is identical: the Connect wallet button asks for accounts, stores the active address in memory, and the Run button on each Try-it panel signs with that key.
+All four paths converge on the same `request({ method: "eth_signTypedData_v4", … })` call. The `source` badge next to the connected address tells you which path was used ("Farcaster mini-app", "MetaMask", "window.ethereum", etc.).
+
+If none of the paths produce a provider, the Connect button surfaces a detailed error listing everything it tried — so you can tell whether your Farcaster client failed to inject the SDK, or the page is open in a plain browser with no wallet installed.
 
 ## What works, what doesn't
 

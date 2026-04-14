@@ -35,19 +35,22 @@ Look up a single cast by hash or URL.
 
 ## GET /v2/farcaster/cast/bulk
 
-Batch cast lookup by hash list.
+Batch cast lookup by hash list. Also reachable as `GET /v2/farcaster/casts` (spec-style plural), which accepts the same list under the `casts` query parameter instead of `hashes`.
 
 **Query parameters**
 
 | Name | Type | Required | Notes |
 |---|---|---|---|
-| `hashes` | string | yes | Comma-separated `0x`-prefixed cast hashes. |
+| `hashes` | string | yes (for `/cast/bulk`) | Comma-separated `0x`-prefixed cast hashes. |
+| `casts` | string | yes (for `/casts`) | Same shape — accepted as an alternate parameter name. |
 
 **Response**
 
 ```json
 { "casts": [ { "hash": "0x...", "..." : "..." } ] }
 ```
+
+Each lookup is O(1) via the `cast_hash` index — no shard scan.
 
 <div class="try-it"
      data-method="GET"
@@ -119,3 +122,81 @@ The top-level `cast` is the thread root. Each reply node has its own `cast` plus
      data-title="Try /v2/farcaster/cast/conversation"
      data-auth="none"
      data-fields="identifier|query|string|0x hash or URL||required;type|query|string|hash or url|hash|required;reply_depth|query|u32|0 through 5|2"></div>
+
+---
+
+## GET /v2/farcaster/cast/quotes
+
+Casts that quote (embed the `CastId` of) a given cast. Backed by the `CastQuotesIndexer` — a reverse index populated on backfill and kept live.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `identifier` | string | yes | `0x`-prefixed hash of the quoted cast. |
+| `type` | `"hash"` | no | Only `hash` is supported. |
+| `limit` | usize | no | Default `10`. |
+| `cursor` | string | no | Pagination cursor. |
+
+**Response**
+
+```json
+{ "casts": [ { "hash": "0x...", "..." : "..." } ], "next": { "cursor": null } }
+```
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/cast/quotes"
+     data-title="Try /v2/farcaster/cast/quotes"
+     data-auth="none"
+     data-fields="identifier|query|string|0x-prefixed cast hash||required;type|query|string||hash;limit|query|usize||10"></div>
+
+---
+
+## GET /v2/farcaster/cast/metrics
+
+Aggregate cast search volume over a time interval. Currently returns an empty metrics array — per-cast metrics are available via the feed endpoints (which attach likes/recasts/replies counts), but aggregate time-series analytics over arbitrary search queries are not computed on-node.
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `q` | string | yes | Search query. |
+| `interval` | string | no | `1d`, `7d`, `30d`, `90d`, `180d`. |
+| `author_fid` | u64 | no | Narrow to a specific author. |
+| `channel_id` | string | no | Narrow to a specific channel. |
+
+**Response**
+
+```json
+{ "metrics": [], "next": { "cursor": null } }
+```
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/cast/metrics"
+     data-title="Try /v2/farcaster/cast/metrics"
+     data-auth="none"
+     data-fields="q|query|string|search query||required;interval|query|string||30d;author_fid|query|u64;channel_id|query|string"></div>
+
+---
+
+## GET /v2/farcaster/cast/conversation/summary
+
+LLM-generated conversation summary. This node does not run an LLM — the endpoint is registered for SDK compatibility and returns a short placeholder string.
+
+**Response**
+
+```json
+{ "summary": "Conversation summaries require LLM integration which is not available on this node." }
+```
+
+---
+
+## GET /v2/farcaster/cast/embed/crawl
+
+Crawl and extract metadata from an embed URL. URL crawling requires an external HTTP service — not performed on-node. Returns `{ "metadata": null }`.
+
+## Write endpoints
+
+`POST /v2/farcaster/cast` and `DELETE /v2/farcaster/cast` are registered but return `501 Not Implemented`. Submit casts via signed protocol messages through the gRPC `SubmitMessage` endpoint.

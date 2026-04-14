@@ -97,3 +97,119 @@ curl -s "https://haatz.quilibrium.com/v2/farcaster/feed/channels?channel_ids=mem
      data-title="Try /v2/farcaster/feed/channels"
      data-auth="none"
      data-fields="channel_ids|query|string|comma-separated ids|memes,base,dev|required"></div>
+
+---
+
+## GET /v2/farcaster/feed/parent_urls
+
+Feed of casts with a matching `parent_url`. Useful when you have raw parent URLs (not yet resolved to a channel id).
+
+**Query parameters**
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `parent_urls` | string | yes | Comma-separated parent URLs. |
+| `limit` | usize | no | |
+| `cursor` | string | no | |
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/parent_urls"
+     data-title="Try /v2/farcaster/feed/parent_urls"
+     data-auth="none"
+     data-fields="parent_urls|query|string|comma-separated parent URLs||required;limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/feed/for_you
+
+Personalized "For You" feed. Personalization requires model inference which isn't available on-node, so this endpoint currently returns the trending feed. Registered for SDK compatibility.
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `limit` | usize | no |
+| `cursor` | string | no |
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/for_you"
+     data-title="Try /v2/farcaster/feed/for_you"
+     data-auth="none"
+     data-fields="limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/feed/topic
+
+Feed filtered by topic slug. No on-node hashtag/topic indexing exists, so this endpoint currently returns the trending feed. Registered for SDK compatibility.
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/topic"
+     data-title="Try /v2/farcaster/feed/topic"
+     data-auth="none"
+     data-fields="limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/feed/user/casts
+
+User's casts in reverse chronological order. Each cast is enriched with engagement metrics (likes, recasts, replies counts) from the `MetricsIndexer`.
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `fid` | u64 | yes |
+| `limit` | usize | no |
+| `cursor` | string | no |
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/user/casts"
+     data-title="Try /v2/farcaster/feed/user/casts"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>
+
+---
+
+## GET /v2/farcaster/feed/user/popular
+
+A user's top 10 casts by engagement score (likes + recasts + replies), computed from the local `MetricsIndexer`.
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `fid` | u64 | yes |
+| `limit` | usize | no | Default `10`, capped at `10`. |
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/user/popular"
+     data-title="Try /v2/farcaster/feed/user/popular"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10"></div>
+
+---
+
+## GET /v2/farcaster/feed/user/replies_and_recasts
+
+A user's casts filtered to only replies (casts with a `parent` field).
+
+**Query parameters**
+
+| Name | Type | Required |
+|---|---|---|
+| `fid` | u64 | yes |
+| `limit` | usize | no |
+| `cursor` | string | no |
+
+<div class="try-it"
+     data-method="GET"
+     data-path="/v2/farcaster/feed/user/replies_and_recasts"
+     data-title="Try /v2/farcaster/feed/user/replies_and_recasts"
+     data-auth="none"
+     data-fields="fid|query|u64||3|required;limit|query|usize||10;cursor|query|string"></div>

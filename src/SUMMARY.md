@@ -29,6 +29,8 @@
 - [Follows](./reference/reads/follows.md)
 - [User notifications](./reference/reads/notifications.md)
 - [Usernames & proofs](./reference/reads/usernames.md)
+- [Signers & on-chain events](./reference/reads/signers.md)
+- [Blocks, mutes, bans](./reference/reads/blocks-mutes.md)
 - [Batch reads](./reference/reads/batch.md)
 
 # Webhooks

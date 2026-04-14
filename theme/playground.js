@@ -205,29 +205,80 @@
 
   const wallet = {
     address: null,
-    provider: null,  // Either window.ethereum or a Farcaster mini-app-provided EIP-1193 provider.
-    source: null,    // "mini-app" | "window.ethereum"
+    provider: null,  // EIP-1193 provider from any of the detection paths.
+    source: null,    // Human-readable provider source tag.
   };
 
+  // --- EIP-6963 discovery --------------------------------------------------
+  //
+  // Modern wallets announce themselves via the EIP-6963 event protocol rather
+  // than (or in addition to) stomping on window.ethereum. We keep a running
+  // registry populated by listening for `eip6963:announceProvider` events;
+  // callers can then pick by name ("MetaMask", "Rabby", "Coinbase Wallet", …)
+  // or take the first one.
+  const eip6963Providers = [];
+  window.addEventListener("eip6963:announceProvider", (event) => {
+    const detail = event.detail;
+    if (!detail || !detail.provider || !detail.info) return;
+    // Dedupe by uuid.
+    if (eip6963Providers.some((p) => p.info && p.info.uuid === detail.info.uuid)) return;
+    eip6963Providers.push({ info: detail.info, provider: detail.provider });
+    document.dispatchEvent(new CustomEvent("hypersnap-providers-changed"));
+  });
+  // Ask wallets that were loaded before this script ran to announce now.
+  try { window.dispatchEvent(new Event("eip6963:requestProvider")); } catch (_) {}
+
   async function detectProvider() {
-    // Farcaster mini-app SDK (if loaded).
+    // 1. Farcaster mini-app SDK — new async API.
+    try {
+      if (window.sdk && window.sdk.wallet && typeof window.sdk.wallet.getEthereumProvider === "function") {
+        const p = await window.sdk.wallet.getEthereumProvider();
+        if (p) return { provider: p, source: "Farcaster mini-app" };
+      }
+    } catch (_) { /* fall through */ }
+    // 2. Farcaster mini-app SDK — legacy sync property.
     if (window.sdk && window.sdk.wallet && window.sdk.wallet.ethProvider) {
-      return { provider: window.sdk.wallet.ethProvider, source: "mini-app" };
+      return { provider: window.sdk.wallet.ethProvider, source: "Farcaster mini-app" };
     }
     if (window.farcasterMiniApp && window.farcasterMiniApp.ethProvider) {
-      return { provider: window.farcasterMiniApp.ethProvider, source: "mini-app" };
+      return { provider: window.farcasterMiniApp.ethProvider, source: "Farcaster mini-app" };
     }
-    // Generic EIP-1193 injected provider (MetaMask, Frame, Rabby, etc.).
+    // 3. EIP-6963 — ask any newly-loaded wallets to announce, then wait
+    // briefly for them to respond.
+    try { window.dispatchEvent(new Event("eip6963:requestProvider")); } catch (_) {}
+    if (eip6963Providers.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    if (eip6963Providers.length > 0) {
+      const picked = eip6963Providers[0];
+      return { provider: picked.provider, source: picked.info.name || "EIP-6963 wallet" };
+    }
+    // 4. Generic injected EIP-1193 (legacy MetaMask / Frame / Rabby path).
     if (window.ethereum) {
-      return { provider: window.ethereum, source: "window.ethereum" };
+      // Some wallets expose multiple providers via `providers` array.
+      const p = Array.isArray(window.ethereum.providers) && window.ethereum.providers.length
+        ? window.ethereum.providers[0]
+        : window.ethereum;
+      return { provider: p, source: "window.ethereum" };
     }
     return null;
+  }
+
+  /** Expose the detected EIP-6963 provider list so UI can list them. */
+  function availableProviders() {
+    return eip6963Providers.map((p) => ({ name: p.info.name, icon: p.info.icon, uuid: p.info.uuid }));
   }
 
   async function connectWallet() {
     const detected = await detectProvider();
     if (!detected) {
-      throw new Error("No Ethereum provider found. Install MetaMask / Frame / Rabby, or open this page inside a Farcaster client with a connected wallet.");
+      const hints = [
+        "No Ethereum provider found.",
+        "Tried: Farcaster mini-app SDK (window.sdk.wallet), EIP-6963 discovery, and window.ethereum.",
+        "Install a wallet extension (MetaMask / Rabby / Coinbase Wallet / Frame),",
+        "or open this page inside a Farcaster client with a connected wallet.",
+      ];
+      throw new Error(hints.join(" "));
     }
     const accounts = await detected.provider.request({ method: "eth_requestAccounts" });
     if (!accounts || accounts.length === 0) throw new Error("No accounts returned by wallet.");

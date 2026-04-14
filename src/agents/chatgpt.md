@@ -45,7 +45,7 @@ Provide the `llms.txt` URL. ChatGPT's browsing path is slower and less reliable 
 
 ## ChatGPT-specific gotchas
 
-- **Schema hallucination.** GPT is more prone than Claude to inventing Neynar-style field names (e.g. `object_type`, `viewer_context`). Use a strict prompt ("only use fields present in the documentation") and skim the output for familiar-but-wrong field names before running it.
+- **Schema hallucination.** GPT is more prone than Claude to inventing field names from other Farcaster-compatible APIs (e.g. `object_type`, `viewer_context`). Use a strict prompt ("only use fields present in the documentation") and skim the output for familiar-but-wrong field names before running it.
 - **EIP-712 type naming.** GPT sometimes emits `verifyingContract` in the domain even though Hypersnap's domain only has `name`/`version`/`chainId`. Spell out the exact domain in your prompt.
 - **"Here's a helpful wrapper I just imagined."** GPT likes to propose fictitious npm packages (e.g. `@hypersnap/client`). Instruct it to use only the standard library or well-known HTTP clients (axios, requests, reqwest).
 
